@@ -597,8 +597,125 @@
                 padding: 1rem;
             }
         }
-    </style>
-    <script scr="https://cdn.paddle.com/paddle.js"></script>
+</style>
+<!-- Paddle Payment Script - CSAK EGYSZER! -->
+<script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
+<script>
+    // Várjuk meg míg minden betöltődik
+    window.addEventListener('load', function() {
+        console.log('Page loaded, initializing Paddle...');
+        
+        // Paddle inicializálás
+        if (typeof Paddle !== 'undefined') {
+            Paddle.Initialize({
+                seller: 276853,
+                eventCallback: function(data) {
+                    console.log('Paddle event:', data);
+                    
+                    // Sikeres vásárlás kezelése
+                    if (data.name === 'checkout.completed') {
+                        console.log('✅ Sikeres vásárlás!', data);
+                        // Átirányítás a köszönő oldalra
+                        setTimeout(function() {
+                            window.location.href = 'koszonjuk.html?transaction=' + data.data.id;
+                        }, 2000);
+                    }
+                }
+            });
+            
+            console.log('✅ Paddle initialized for seller:', 276853);
+            
+            // ============================
+            // GOMB ESEMÉNYKEZELŐK - JAVÍTOTT ID-KKEL!
+            // ============================
+            
+            // 1. REGISZTRÁCIÓ FORM (a HTML-ben registerFormElement van!)
+            const registerForm = document.getElementById('registerFormElement');
+            if (registerForm) {
+                registerForm.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    console.log('📝 Regisztrációs form küldve');
+                    
+                    const name = document.getElementById('registerName').value;
+                    const email = document.getElementById('registerEmail').value;
+                    const password = document.getElementById('registerPassword').value;
+                    
+                    if (!name || !email || !password) {
+                        alert('Kérjük, töltsd ki minden mezőt!');
+                        return;
+                    }
+                    
+                    console.log('Regisztráció adatok:', { name, email });
+                    
+                    // Első évfolyam vásárlása
+                    Paddle.Checkout.open({
+                        items: [{
+                            priceId: 'pro_01kebx34pzeahysa691ax7khgb',
+                            quantity: 1
+                        }],
+                        customer: {
+                            email: email,
+                            name: name
+                        }
+                    });
+                });
+            } else {
+                console.warn('⚠️ registerFormElement not found!');
+            }
+            
+            // 2. BEJELENTKEZÉS FORM (a HTML-ben loginFormElement van!)
+            const loginForm = document.getElementById('loginFormElement');
+            if (loginForm) {
+                loginForm.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    console.log('🔐 Bejelentkezési form küldve');
+                    
+                    const loginInput = document.getElementById('loginEmail').value;
+                    const password = document.getElementById('loginPassword').value;
+                    
+                    if (!loginInput) {
+                        alert('Kérjük, add meg az email címed vagy jelszavad!');
+                        return;
+                    }
+                    
+                    if (loginInput.includes('@')) {
+                        console.log('Bejelentkezés emaillel:', loginInput);
+                        alert('Bejelentkezés email címre: ' + loginInput);
+                    } else {
+                        console.log('Bejelentkezés jelszóval:', loginInput);
+                        alert('Bejelentkezés jelszóval');
+                    }
+                });
+            }
+            
+            // 3. FORM VÁLTÓ GOMBOK
+            const showRegister = document.getElementById('showRegister');
+            const showLogin = document.getElementById('showLogin');
+            const loginFormDiv = document.getElementById('loginForm');
+            const registerFormDiv = document.getElementById('registerForm');
+            
+            if (showRegister && showLogin && loginFormDiv && registerFormDiv) {
+                registerFormDiv.style.display = 'none';
+                
+                showRegister.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    loginFormDiv.style.display = 'none';
+                    registerFormDiv.style.display = 'block';
+                });
+                
+                showLogin.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    registerFormDiv.style.display = 'none';
+                    loginFormDiv.style.display = 'block';
+                });
+            }
+            
+        } else {
+            console.error('❌ Paddle script not loaded!');
+        }
+    });
+</script>
+<!-- End of Paddle Payment Script -->
 </head>
 <body>
     <!-- A meglévő loginForm kibővítve -->
